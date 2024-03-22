@@ -20,7 +20,6 @@
             color: white;
         }
     </style>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
     <script>
@@ -31,44 +30,45 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         var db = firebase.firestore();
-    </script>
-    <script defer>
-        // Document ready function
+        
+        // Function to handle form submission
+        function submitForm(e) {
+            e.preventDefault();
+            
+            let formData = {
+                name: document.getElementById('name').value,
+                date: document.getElementById('date').value,
+                time: document.getElementById('time').value,
+                locations: Array.from(document.querySelectorAll('input[name="locations"]:checked')).map(el => el.value)
+            };
+
+            db.collection("checks").add(formData).then(() => {
+                alert('Record added successfully!');
+                // Optionally, clear the form here
+            }).catch((error) => {
+                console.error("Error adding document: ", error);
+            });
+        }
+
+        // Function to load and display records
+        function loadRecords() {
+            db.collection("checks").get().then((querySnapshot) => {
+                let recordsHTML = "";
+                querySnapshot.forEach((doc) => {
+                    let data = doc.data();
+                    recordsHTML += `<div>Name: ${data.name}, Date: ${data.date}, Time: ${data.time}</div>`;
+                    if(data.locations && data.locations.length > 0) {
+                        recordsHTML += `<div>Locations: ${data.locations.join(", ")}</div>`;
+                    }
+                    recordsHTML += "<hr>"; // Divider between records
+                });
+                document.getElementById('checksContainer').innerHTML = recordsHTML;
+            });
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
-            // Handle form submission
-            document.getElementById('checkForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                let formData = {
-                    name: document.getElementById('name').value,
-                    date: document.getElementById('date').value,
-                    time: document.getElementById('time').value,
-                    locations: Array.from(document.querySelectorAll('input[name="locations"]:checked')).map(el => el.value)
-                };
-
-                db.collection("checks").add(formData).then(() => {
-                    alert('Record added successfully!');
-                    // Clear the form or refresh the page to reset form inputs
-                }).catch((error) => {
-                    console.error("Error adding document: ", error);
-                });
-            });
-
-            // Load and display records
-            document.getElementById('loadData').addEventListener('click', function() {
-                db.collection("checks").get().then((querySnapshot) => {
-                    let recordsHTML = "";
-                    querySnapshot.forEach((doc) => {
-                        let data = doc.data();
-                        recordsHTML += `<div>Name: ${data.name}, Date: ${data.date}, Time: ${data.time}</div>`;
-                        if(data.locations && data.locations.length > 0) {
-                            recordsHTML += `<div>Locations: ${data.locations.join(", ")}</div>`;
-                        }
-                        recordsHTML += "<hr>"; // Divider between records
-                    });
-                    document.getElementById('checksContainer').innerHTML = recordsHTML;
-                });
-            });
+            document.getElementById('checkForm').addEventListener('submit', submitForm);
+            document.getElementById('loadData').addEventListener('click', loadRecords);
         });
     </script>
 </head>
@@ -78,15 +78,10 @@
         <input type="text" id="name" placeholder="Name" required>
         <input type="date" id="date" required>
         <input type="time" id="time" required>
-        <div>
-            <!-- Checkbox inputs for locations -->
-            <!-- Ensure the 'value' attributes for these checkboxes are correct -->
-        </div>
+        <!-- Your checkboxes for locations go here -->
         <button type="submit">Submit</button>
     </form>
-    <!-- Button for loading records -->
     <button id="loadData">Load Records</button>
-    <!-- Container for displaying fetched records -->
     <div id="checksContainer"></div>
 </body>
 </html>
