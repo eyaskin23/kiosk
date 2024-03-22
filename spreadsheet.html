@@ -4,10 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kiosk Checks Database</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background-color: #F0F0F0;
+        }
+        table, th, td {
+            border: 1px solid #DDDDDD;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+    </style>
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
-    <script src="script.js" defer></script>
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            // Your Firebase configuration
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+    </script>
+    <script defer>
+        // Document ready function
+        document.addEventListener("DOMContentLoaded", function() {
+            // Handle form submission
+            document.getElementById('checkForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let formData = {
+                    name: document.getElementById('name').value,
+                    date: document.getElementById('date').value,
+                    time: document.getElementById('time').value,
+                    locations: Array.from(document.querySelectorAll('input[name="locations"]:checked')).map(el => el.value)
+                };
+
+                db.collection("checks").add(formData).then(() => {
+                    alert('Record added successfully!');
+                    // Clear the form or refresh the page to reset form inputs
+                }).catch((error) => {
+                    console.error("Error adding document: ", error);
+                });
+            });
+
+            // Load and display records
+            document.getElementById('loadData').addEventListener('click', function() {
+                db.collection("checks").get().then((querySnapshot) => {
+                    let recordsHTML = "";
+                    querySnapshot.forEach((doc) => {
+                        let data = doc.data();
+                        recordsHTML += `<div>Name: ${data.name}, Date: ${data.date}, Time: ${data.time}</div>`;
+                        if(data.locations && data.locations.length > 0) {
+                            recordsHTML += `<div>Locations: ${data.locations.join(", ")}</div>`;
+                        }
+                        recordsHTML += "<hr>"; // Divider between records
+                    });
+                    document.getElementById('checksContainer').innerHTML = recordsHTML;
+                });
+            });
+        });
+    </script>
 </head>
 <body>
     <h2>Kiosk Checks Database</h2>
@@ -16,17 +79,14 @@
         <input type="date" id="date" required>
         <input type="time" id="time" required>
         <div>
-            <input type="checkbox" id="library1" name="locations" value="Library 1"><label for="library1">Library 1</label>
-            <input type="checkbox" id="library2" name="locations" value="Library 2"><label for="library2">Library 2</label>
-            <input type="checkbox" id="library3" name="locations" value="Library 3"><label for="library3">Library 3</label>
-            <input type="checkbox" id="wcc1" name="locations" value="Library 3"><label for="wcc1">WCC 1</label>
-            <input type="checkbox" id="wcc2" name="locations" value="Library 3"><label for="wcc2">WCC 2</label>
-            <input type="checkbox" id="studentorg1" name="locations" value="Library 3"><label for="stuorg1">Student Org 1</label>
-            <input type="checkbox" id="studentorg2" name="locations" value="Library 3"><label for="stuorg2">Student Org 2</label>
-            <input type="checkbox" id="computerlab" name="locations" value="Library 3"><label for="computerlab">Computer Lab</label>
+            <!-- Checkbox inputs for locations -->
+            <!-- Ensure the 'value' attributes for these checkboxes are correct -->
         </div>
         <button type="submit">Submit</button>
     </form>
+    <!-- Button for loading records -->
+    <button id="loadData">Load Records</button>
+    <!-- Container for displaying fetched records -->
     <div id="checksContainer"></div>
 </body>
 </html>
