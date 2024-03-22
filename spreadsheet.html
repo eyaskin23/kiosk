@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Checks Database</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h2>Kiosk Checks Database</h2>
+    <form id="checkForm">
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="date" id="date" required>
+        <input type="time" id="time" required>
+        <div>
+            <input type="checkbox" id="library1" name="locations" value="Library 1"><label for="library1">Library 1</label>
+            <input type="checkbox" id="library2" name="locations" value="Library 2"><label for="library2">Library 2</label>
+            <input type="checkbox" id="library3" name="locations" value="Library 3"><label for="library3">Library 3</label>
+            <!-- Add more locations as needed -->
+        </div>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="checksContainer"></div>
+</body>
+</html>
